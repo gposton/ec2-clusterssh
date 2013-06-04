@@ -1,29 +1,29 @@
-ec2-clusterssh
-==============
+# Ec2::Clusterssh
 
-A script that uses EC2 instance tags to generate a list of public dns names to be consumed by cluster ssh
+Use instance tags to launch a ClusterSSH session to multiple EC2 instances.
 
-## Installation/Setup
+## Installation
 
-- Copy 'cluster' to /usr/local/bin (or somewhere in your path).
-- Install [ClusterSSH](http://sourceforge.net/apps/mediawiki/clusterssh/index.php?title=Main_Page)
-- Edit /etc/csshrc to add the path to your identity file (rsa key).
+    $ gem install ec2-clusterssh
 
-> ssh_args = "-i path/to/identity/file"
+## Prerequisites
+
+- [ClusterSSH](http://sourceforge.net/apps/mediawiki/clusterssh/index.php?title=Main_Page)
 
 ## Usage
 
+    $cluster -h
     Usage: cluster [-t TAG] -v VALUES
         -t, --tag [TAG]                  TAG to filter on (default: role)
         -v, --values [VALUES]            a comma separated (no spaces) of values to match against (i.e. web,database)
 
-## Examples
 
-### Test output
+    $cluster -l ec2-user -t Name -v web,database
 
-    $cluster -t Name -v web,database
-    ec2-xx-xx-xxx-xx.compute-1.amazonaws.com ec2-xx-xx-xxx-xxx.compute-1.amazonaws.com ec2-xx-xxx-xxx-xx.compute-1.amazonaws.com
+## Contributing
 
-### Use script to ClusterSSH
-
-    $cssh -l ec2-user `cluster -t Name -v web,database`
+1. Fork it
+2. Create your feature branch (`git checkout -b my-new-feature`)
+3. Commit your changes (`git commit -am 'Add some feature'`)
+4. Push to the branch (`git push origin my-new-feature`)
+5. Create new Pull Request

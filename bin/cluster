@@ -2,9 +2,13 @@
 
 require 'optparse'
 
-options = {'tag' => 'role'}
+options = {'tag' => 'role', 'user' => 'ec2-user'}
 OptionParser.new do |opts|
-  opts.banner = "Usage: cluster [-t TAG] -v VALUES"
+  opts.banner = "Usage: cluster [-t TAG -l USER] -v VALUES"
+
+  opts.on("-l", "--login [USER]", "Log in with this user (default: #{options['user']}") do |opt|
+    options['user'] = opt
+  end
 
   opts.on("-t", "--tag [TAG]", "TAG to filter on (default: #{options['tag']}") do |opt|
     options['tag'] = opt
@@ -42,4 +46,4 @@ options['values'].each do |value|
   end
 end
 
-puts dns.join ' '
+exec "csshX -l #{options['user']} #{dns.join ' '}"
