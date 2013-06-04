@@ -46,4 +46,6 @@ options['values'].each do |value|
   end
 end
 
-exec "csshX -l #{options['user']} #{dns.join ' '}"
+cssh = (/darwin/ =~ RUBY_PLATFORM) ? 'csshX' : 'cssh'
+
+exec "#{cssh} -l #{options['user']} #{dns.join ' '}"
