@@ -1,0 +1,45 @@
+#!/usr/bin/env ruby
+
+require 'optparse'
+
+options = {'tag' => 'role'}
+OptionParser.new do |opts|
+  opts.banner = "Usage: cluster [-t TAG] -v VALUES"
+
+  opts.on("-t", "--tag [TAG]", "TAG to filter on (default: #{options['tag']}") do |opt|
+    options['tag'] = opt
+  end
+
+  opts.on("-v", "--values [VALUES]", Array, "a comma separated (no spaces) list of values to match against (i.e. web,database)") do |opt|
+    options['values'] = opt
+  end
+end.parse!
+
+instances = {}
+tags = {}
+
+output = %x{ec2-describe-instances}
+output.split(/\n/).each do |line|
+  words = line.split(/\s/)
+  if words[0] == 'INSTANCE'
+    instance_id = words[1]
+    public_dns = words[3]
+    instances[instance_id] = public_dns
+  elsif words[0] == 'TAG'
+    instance_id = words[2]
+    tag = words[3]
+    value = words[4]
+    tags[tag] = {} if tags[tag].nil?
+    tags[tag][value] = [] if tags[tag][value].nil?
+    tags[tag][value] << instance_id
+  end
+end
+
+dns = []
+options['values'].each do |value|
+  tags[options['tag']][value].each do |instance_id|
+    dns << instances[instance_id]
+  end
+end
+
+puts dns.join ' '
