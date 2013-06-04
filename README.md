@@ -20,7 +20,8 @@ Use instance tags to launch a ClusterSSH session to multiple EC2 instances.
 ## Usage
 
     $cluster -h
-    Usage: cluster [-t TAG] -v VALUES
+    Usage: cluster [-t TAG -l USER] -v VALUES
+        -l, --user [USER]                User to log in as (default: ec2-user)
         -t, --tag [TAG]                  TAG to filter on (default: role)
         -v, --values [VALUES]            a comma separated (no spaces) of values to match against (i.e. web,database)
 
