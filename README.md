@@ -8,6 +8,7 @@ A script that uses EC2 instance tags to generate a list of public dns names to b
 - Copy 'cluster' to /usr/local/bin (or somewhere in your path).
 - Install [ClusterSSH](http://sourceforge.net/apps/mediawiki/clusterssh/index.php?title=Main_Page)
 - Edit /etc/csshrc to add the path to your identity file (rsa key).
+
     ssh_args = -i path/to/identity/file
 
 ## Usage
