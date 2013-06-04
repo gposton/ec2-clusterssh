@@ -9,6 +9,9 @@ Use instance tags to launch a ClusterSSH session to multiple EC2 instances.
 ## Prerequisites
 
 - [ClusterSSH](http://sourceforge.net/apps/mediawiki/clusterssh/index.php?title=Main_Page)
+- Edit /etc/csshrc to add the path to your identity file (rsa key).
+
+> ssh_args = "-i path/to/identity/file"
 
 ## Usage
 
