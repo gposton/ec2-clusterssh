@@ -13,7 +13,9 @@ Use instance tags to launch a ClusterSSH session to multiple EC2 instances.
   as command line options)
 
 > export AWS_ACCESS_KEY_ID='...'
+
 > export AWS_SECRET_ACCESS_KEY='...'
+
 > export AWS_REGION='us-west-2'
 
 - Edit /etc/csshrc to add the path to your identity file (rsa key).
