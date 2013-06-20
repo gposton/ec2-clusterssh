@@ -1,10 +1,12 @@
 #!/usr/bin/env ruby
 
 require 'optparse'
+require 'rubygems'
+require 'aws-sdk'
 
 options = {'tag' => 'role', 'user' => 'ec2-user'}
 OptionParser.new do |opts|
-  opts.banner = "Usage: cluster [-t TAG -l USER] -v VALUES"
+  opts.banner = "Usage: cluster [-t TAG] [-l USER] [-k KEY -s SECRET] [-r region] -v VALUES"
 
   opts.on("-l", "--login [USER]", "Log in with this user (default: #{options['user']}") do |opt|
     options['user'] = opt
@@ -17,34 +19,30 @@ OptionParser.new do |opts|
   opts.on("-v", "--values [VALUES]", Array, "a comma separated (no spaces) list of values to match against (i.e. web,database)") do |opt|
     options['values'] = opt
   end
+
+  opts.on("-k", "--access-key [KEY]", "AWS access key") do |opt|
+    options['aws_access_key'] = opt
+  end
+
+  opts.on("-s", "--secret-key [SECRET]", "AWS secret key") do |opt|
+    options['aws_secret_key'] = opt
+  end
+
+  opts.on("-r", "--region [REGION]", "AWS region") do |opt|
+    options['region'] = opt
+  end
 end.parse!
 
-instances = {}
-tags = {}
-
-output = %x{ec2-describe-instances}
-output.split(/\n/).each do |line|
-  words = line.split(/\s/)
-  if words[0] == 'INSTANCE'
-    instance_id = words[1]
-    public_dns = words[3]
-    instances[instance_id] = public_dns
-  elsif words[0] == 'TAG'
-    instance_id = words[2]
-    tag = words[3]
-    value = words[4]
-    tags[tag] = {} if tags[tag].nil?
-    tags[tag][value] = [] if tags[tag][value].nil?
-    tags[tag][value] << instance_id
-  end
+if !options['aws_secret_key'].nil? && !options['aws_access_key'].nil?
+  AWS.config(access_key_id: options['aws_access_key'], secret_access_key: options['aws_secret_key'])
 end
 
-dns = []
-options['values'].each do |value|
-  tags[options['tag']][value].each do |instance_id|
-    dns << instances[instance_id]
-  end
+if !options['region'].nil?
+  AWS.config(region: options['region'])
 end
+
+ec2 = AWS.ec2
+dns = ec2.instances.tagged(options['tag']).tagged_values(options['values']).map{|instance| instance.dns_name}
 
 cssh = (/darwin/ =~ RUBY_PLATFORM) ? 'csshX' : 'cssh'
 
