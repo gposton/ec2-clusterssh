@@ -20,6 +20,7 @@ Use instance tags to launch a ClusterSSH session to multiple EC2 instances.
 
 - Edit /etc/csshrc to add the path to your identity file (rsa key).
 - NOTE: Some linux users have reported problems using /etc/csshrc, but have had success using ~/.csshrc.
+- NOTE: To install csshx on mac use this [page](https://code.google.com/p/csshx/).
 
 > ssh_args = "-i path/to/identity/file"
 
