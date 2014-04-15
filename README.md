@@ -5,6 +5,10 @@ Use instance tags to launch a ClusterSSH session to multiple EC2 instances.
 ## Installation
 
     $ gem install ec2-clusterssh
+    
+Note:  Mac users with the latest version of XCode may run into a compilation error installing the json gem dependency.  If you see the following error during the gem installation, see this [page](https://langui.sh/2014/03/10/wunused-command-line-argument-hard-error-in-future-is-a-harsh-mistress/) for a workaround
+
+> clang: error: unknown argument: '-multiply_definedsuppress' [-Wunused-command-line-argument-hard-error-in-future]
 
 ## Prerequisites
 
@@ -19,7 +23,7 @@ Use instance tags to launch a ClusterSSH session to multiple EC2 instances.
 > export AWS_REGION='us-west-2'
 
 - Edit /etc/csshrc to add the path to your identity file (rsa key).
-- NOTE: Some linux users have reported problems using /etc/csshrc, but have had success using ~/.csshrc.
+NOTE: Some linux users have reported problems using /etc/csshrc, but have had success using ~/.csshrc.
 
 > ssh_args = -i path/to/identity/file
 
