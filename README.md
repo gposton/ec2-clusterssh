@@ -27,12 +27,14 @@ Note:  Mac users with the latest version of XCode may run into a compilation err
         -l, --login [USER]               Log in with this user
         -t, --tags [TAGS]                a 'space' sparated key value pair of tags and values (i.e. -t 'role=web,database environment=dev')
         -r, --region [REGION]            AWS region
+        -o, --options [SSH_OPTIONS]      ssh options to pass directly to cssh
         -s, --screen [SCREEN]            What screen to use for clustering windows (form multiple displays)
         -p, --use-public-ip              Use public IP (default false)
 
 
     $cluster -t Name=web,database                  #Connects to all web and database servers
     $cluster -t 'role=web,database environment=dev'  #Connects to all web and database servers in the dev environment
+    $cluster -t 'role=web,database environment=dev' -o"-i /Path/to/key.pem"  # connect using explicit private key
 
 ## Notes
 
