@@ -37,8 +37,11 @@ NOTE: Some linux users have reported problems using /etc/csshrc, but have had su
         -k, --access-key [KEY]           AWS access key
         -s, --secret-key [SECRET]        AWS secret key
         -r, --region [REGION]            AWS region
+        -o, --options [SSH_OPTIONS]      ssh options to pass directly to cssh
+
 
     $cluster -l ec2-user -t Name -v web,database
+    $cluster -o"-i /Path/to/key.pem" -t TagName -v database
 
 ## Contributing
 
