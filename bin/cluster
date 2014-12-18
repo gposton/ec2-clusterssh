@@ -4,20 +4,16 @@ require 'optparse'
 require 'rubygems'
 require 'aws-sdk'
 
-options = {'tag' => 'role', 'user' => 'ec2-user'}
+options = {'user' => 'ec2-user', 'use_private_ip' => false}
 OptionParser.new do |opts|
-  opts.banner = "Usage: cluster [-t TAG] [-l USER] [-k KEY -s SECRET] [-r region] -v VALUES"
+  opts.banner = "Usage: cluster [-t TAGS] [-l USER] [-k KEY -s SECRET] [-r region]"
 
   opts.on("-l", "--login [USER]", "Log in with this user (default: #{options['user']}") do |opt|
     options['user'] = opt
   end
 
-  opts.on("-t", "--tag [TAG]", "TAG to filter on (default: #{options['tag']}") do |opt|
-    options['tag'] = opt
-  end
-
-  opts.on("-v", "--values [VALUES]", Array, "a comma separated (no spaces) list of values to match against (i.e. web,database)") do |opt|
-    options['values'] = opt
+  opts.on("-t", "--tags [TAGS]", Array, "a 'space' sparated key value pair of tags and values (i.e. role=web,database environment=dev)") do |opt|
+    options['tags'] = opt
   end
 
   opts.on("-k", "--access-key [KEY]", "AWS access key") do |opt|
@@ -31,6 +27,10 @@ OptionParser.new do |opts|
   opts.on("-r", "--region [REGION]", "AWS region") do |opt|
     options['region'] = opt
   end
+
+  opts.on("-p", "--use-private-ip", "Use private IP (default #{options['use_private_ip']})") do
+    options['use_private_ip'] = true
+  end
 end.parse!
 
 if !options['aws_secret_key'].nil? && !options['aws_access_key'].nil?
@@ -42,7 +42,21 @@ if !options['region'].nil?
 end
 
 ec2 = AWS.ec2
-dns = ec2.instances.tagged(options['tag']).tagged_values(options['values']).map{|instance| instance.dns_name}
+
+# filter instances based on tags
+instances = ec2.instances
+options['tags'].each do |tag|
+  tag = tag.split('=')
+  instances = instances.tagged(tag[0]).tagged_values(tag[1])
+end
+
+# get dns entries for cssh
+dns = nil
+if options['use_private_ip']
+  dns = instances.map{|instance| instance.private_ip_address}
+else
+  dns = instances.map{|instance| instance.dns_name}
+end
 
 cssh = (/darwin/ =~ RUBY_PLATFORM) ? 'csshX' : 'cssh'
 

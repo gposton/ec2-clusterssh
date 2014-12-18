@@ -30,15 +30,16 @@ NOTE: Some linux users have reported problems using /etc/csshrc, but have had su
 ## Usage
 
     $cluster -h
-    Usage: cluster [-t TAG] [-l USER] [-k KEY -s SECRET] [-r region] -v VALUES
-        -l, --login [USER]               Log in with this user (default: ec2-user)
-        -t, --tag [TAG]                  TAG to filter on (default: role)
-        -v, --values [VALUES]            a comma separated (no spaces) list of values to match against (i.e. web,database)
+    Usage: cluster [-t TAGS] [-l USER] [-k KEY -s SECRET] [-r region]
+        -l, --login [USER]               Log in with this user (default: ec2-user
+        -t, --tags [TAGS]                a 'space' sparated key value pair of tags and values (i.e. role=web,database environment=dev)
         -k, --access-key [KEY]           AWS access key
         -s, --secret-key [SECRET]        AWS secret key
         -r, --region [REGION]            AWS region
+        -p, --use-private-ip             Use private IP (default false)
 
-    $cluster -l ec2-user -t Name -v web,database
+    $cluster -l ec2-user -t Name=web,database #Connects to all web and database servers
+    $cluster -l ec2-user -t role=web,database environment=dev  #Connects to all web and database servers in the dev environment
 
 ## Contributing
 
