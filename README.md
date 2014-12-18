@@ -38,7 +38,7 @@ NOTE: Some linux users have reported problems using /etc/csshrc, but have had su
         -r, --region [REGION]            AWS region
         -p, --use-private-ip             Use private IP (default false)
 
-    $cluster -l ec2-user -t Name=web,database #Connects to all web and database servers
+    $cluster -l ec2-user -t Name=web,database                  #Connects to all web and database servers
     $cluster -l ec2-user -t role=web,database environment=dev  #Connects to all web and database servers in the dev environment
 
 ## Contributing
