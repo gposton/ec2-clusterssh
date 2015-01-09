@@ -33,8 +33,6 @@ NOTE: Some linux users have reported problems using /etc/csshrc, but have had su
     Usage: cluster [-t TAGS] [-l USER] [-k KEY -s SECRET] [-r region]
         -l, --login [USER]               Log in with this user (default: ec2-user
         -t, --tags [TAGS]                a 'space' sparated key value pair of tags and values (i.e. role=web,database environment=dev)
-        -k, --access-key [KEY]           AWS access key
-        -s, --secret-key [SECRET]        AWS secret key
         -r, --region [REGION]            AWS region
         -p, --use-private-ip             Use private IP (default false)
 
