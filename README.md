@@ -30,7 +30,7 @@ NOTE: Some linux users have reported problems using /etc/csshrc, but have had su
 ## Usage
 
     $cluster -h
-    Usage: cluster [-t TAGS] [-l USER] [-k KEY -s SECRET] [-r region]
+    Usage: cluster [-t TAGS] [-l USER] [-r region]
         -l, --login [USER]               Log in with this user (default: ec2-user
         -t, --tags [TAGS]                a 'space' sparated key value pair of tags and values (i.e. role=web,database environment=dev)
         -r, --region [REGION]            AWS region
