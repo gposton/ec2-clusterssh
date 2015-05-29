@@ -20,13 +20,6 @@ Note:  Mac users with the latest version of XCode may run into a compilation err
 
 > export AWS_SECRET_ACCESS_KEY='...'
 
-> export AWS_REGION='us-west-2'
-
-- Edit /etc/csshrc to add the path to your identity file (rsa key).
-NOTE: Some linux users have reported problems using /etc/csshrc, but have had success using ~/.csshrc.
-
-> ssh_args = -i path/to/identity/file
-
 ## Usage
 
     $cluster -h
