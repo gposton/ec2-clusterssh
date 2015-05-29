@@ -47,7 +47,6 @@ options['tags'].each do |tag|
   else
     response.reservations.each do |reservation|
       reservation.instances.each do |instance|
-        puts instance.tags
         tag_value = instance.tags.keep_if{|instance_tag| instance_tag[:key] == key}[0][:value]
         if values.include? tag_value
           instances << instance
