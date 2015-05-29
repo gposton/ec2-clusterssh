@@ -6,8 +6,8 @@ require 'aws-sdk'
 
 options = {
   'user'           => 'ec2-user',
-  'use_private_ip' => false,
-  'region'         => 'us-east-1'
+  'use_private_ip' => true,
+  'region'         => 'us-west-2'
 }
 
 OptionParser.new do |opts|
@@ -30,17 +30,36 @@ OptionParser.new do |opts|
   end
 end.parse!
 
-AWS.config(:region => options['region'])
+Aws.config.update({:region => options['region']})
 
-ec2 = AWS::EC2.new
+ec2 = Aws::EC2::Client.new
 
 # filter instances based on tags
-instances = ec2.instances
+instances = []
 options['tags'].each do |tag|
   tag = tag.split('=')
   key = tag[0]
   values = tag[1].split(',')
-  instances = instances.tagged(key).tagged_values(values)
+  response = ec2.describe_instances(filters: [{:name => "tag-key", :values => [key]}])
+  if response.reservations[0].nil?
+    puts "No instances in #{options['region']} had a tag named '#{key}'"
+    next
+  else
+    response.reservations.each do |reservation|
+      reservation.instances.each do |instance|
+        puts instance.tags
+        tag_value = instance.tags.keep_if{|instance_tag| instance_tag[:key] == key}[0][:value]
+        if values.include? tag_value
+          instances << instance
+        end
+      end
+    end
+  end
+end
+
+if instances.length == 0
+  puts "No instnaces matched filter: #{options['tags']}"
+  exit 1
 end
 
 # get dns entries for cssh
@@ -48,13 +67,9 @@ dns = nil
 if options['use_private_ip']
   dns = instances.map{|instance| instance.private_ip_address}
 else
-  dns = instances.map{|instance| instance.dns_name}
+  dns = instances.map{|instance| instance.public_ip_address}
 end
 
-if dns.length == 0
-  puts "No instances matched #{options['tags']}"
-  exit
-end
 
 cssh = (/darwin/ =~ RUBY_PLATFORM) ? 'csshX' : 'cssh'
 
