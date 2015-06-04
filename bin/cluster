@@ -6,7 +6,7 @@ require 'aws-sdk'
 
 options = {
   'user'           => 'ec2-user',
-  'use_private_ip' => true,
+  'use_public_ip'  => false,
   'region'         => 'us-west-2'
 }
 
@@ -25,8 +25,8 @@ OptionParser.new do |opts|
     options['region'] = opt
   end
 
-  opts.on("-p", "--use-private-ip", "Use private IP (default #{options['use_private_ip']})") do
-    options['use_private_ip'] = true
+  opts.on("-p", "--use-public-ip", "Use public IP (default #{options['use_public_ip']})") do
+    options['use_public_ip'] = true
   end
 end.parse!
 
@@ -63,10 +63,10 @@ end
 
 # get dns entries for cssh
 dns = nil
-if options['use_private_ip']
-  dns = instances.map{|instance| instance.private_ip_address}
-else
+if options['use_public_ip']
   dns = instances.map{|instance| instance.public_ip_address}
+else
+  dns = instances.map{|instance| instance.private_ip_address}
 end
 
 
