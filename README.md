@@ -5,7 +5,7 @@ Use instance tags to launch a ClusterSSH session to multiple EC2 instances.
 ## Installation
 
     $ gem install ec2-clusterssh
-    
+
 Note:  Mac users with the latest version of XCode may run into a compilation error installing the json gem dependency.  If you see the following error during the gem installation, see this [page](https://langui.sh/2014/03/10/wunused-command-line-argument-hard-error-in-future-is-a-harsh-mistress/) for a workaround
 
 > clang: error: unknown argument: '-multiply_definedsuppress' [-Wunused-command-line-argument-hard-error-in-future]
@@ -27,10 +27,16 @@ Note:  Mac users with the latest version of XCode may run into a compilation err
         -l, --login [USER]               Log in with this user (default: ec2-user
         -t, --tags [TAGS]                a 'space' sparated key value pair of tags and values (i.e. role=web,database environment=dev)
         -r, --region [REGION]            AWS region
-        -p, --use-private-ip             Use private IP (default false)
+        -p, --use-public-ip              Use public IP (default false)
 
     $cluster -l ec2-user -t Name=web,database                  #Connects to all web and database servers
     $cluster -l ec2-user -t role=web,database environment=dev  #Connects to all web and database servers in the dev environment
+
+## Notes
+
+If you use a bastion jumphost, you'll want to configure your ssh config
+file to route the relavant IP ranges through your bastion.  (i.e.
+192.168.*)
 
 ## Contributing
 
