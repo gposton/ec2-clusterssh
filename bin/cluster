@@ -5,7 +5,6 @@ require 'rubygems'
 require 'aws-sdk'
 
 options = {
-  'user'           => 'ec2-user',
   'use_public_ip'  => false,
   'region'         => 'us-west-2'
 }
@@ -13,7 +12,7 @@ options = {
 OptionParser.new do |opts|
   opts.banner = "Usage: cluster [-t TAGS] [-l USER] [-k KEY -s SECRET] [-r region]"
 
-  opts.on("-l", "--login [USER]", "Log in with this user (default: #{options['user']}") do |opt|
+  opts.on("-l", "--login [USER]", "Log in with this user") do |opt|
     options['user'] = opt
   end
 
@@ -25,9 +24,14 @@ OptionParser.new do |opts|
     options['region'] = opt
   end
 
+  opts.on("-s", "--screen [SCREEN]", "What screen to use for clustering windows (form multiple displays)") do |opt|
+    options['screen'] = opt
+  end
+
   opts.on("-p", "--use-public-ip", "Use public IP (default #{options['use_public_ip']})") do
     options['use_public_ip'] = true
   end
+
 end.parse!
 
 Aws.config.update({:region => options['region']})
@@ -72,7 +76,11 @@ end
 
 cssh = (/darwin/ =~ RUBY_PLATFORM) ? 'csshX' : 'cssh'
 
-cmd = "#{cssh} -l #{options['user']} #{dns.join ' '}"
+cmd = "#{cssh}"
+cmd = cmd + " -l #{options['user']}" unless options['user'].nil?
+cmd = cmd + " -screen #{options['screen']}" unless options['screen'].nil?
+cmd = cmd + " #{dns.join ' '}"
+
 puts "Connecting to #{dns.length} instances"
 puts cmd
 exec cmd
