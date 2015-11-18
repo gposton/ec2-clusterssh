@@ -23,14 +23,16 @@ Note:  Mac users with the latest version of XCode may run into a compilation err
 ## Usage
 
     $cluster -h
-    Usage: cluster [-t TAGS] [-l USER] [-r region]
-        -l, --login [USER]               Log in with this user (default: ec2-user
+    Usage: cluster [-t TAGS] [-l USER] [-k KEY -s SECRET] [-r region]
+        -l, --login [USER]               Log in with this user
         -t, --tags [TAGS]                a 'space' sparated key value pair of tags and values (i.e. role=web,database environment=dev)
         -r, --region [REGION]            AWS region
+        -s, --screen [SCREEN]            What screen to use for clustering windows (form multiple displays)
         -p, --use-public-ip              Use public IP (default false)
 
-    $cluster -l ec2-user -t Name=web,database                  #Connects to all web and database servers
-    $cluster -l ec2-user -t role=web,database environment=dev  #Connects to all web and database servers in the dev environment
+
+    $cluster -t Name=web,database                  #Connects to all web and database servers
+    $cluster -t role=web,database environment=dev  #Connects to all web and database servers in the dev environment
 
 ## Notes
 
