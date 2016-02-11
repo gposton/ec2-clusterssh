@@ -34,31 +34,35 @@ OptionParser.new do |opts|
 
 end.parse!
 
+
 Aws.config.update({:region => options['region']})
+$ec2 = Aws::EC2::Client.new
 
-ec2 = Aws::EC2::Client.new
+def get_instances_by_tag (tag_key,tag_values,options)
+  instances = []
+  response = $ec2.describe_instances(filters: [{:name => "tag:#{tag_key}", :values => tag_values},{:name => "instance-state-name", :values => ['running']}])
+  if response.reservations[0].nil?
+    puts "No running instances in #{options['region']} had a tag named '#{tag_key}' with values '#{tag_values}'"
+  else
+    response.reservations.each do |reservation|
+      reservation.instances.each do |instance|
+        instances << instance
+      end
+    end
+    return instances
+  end
+end
 
+matched_instances = []
 # filter instances based on tags
-instances = []
 options['tags'].each do |tag|
   tag = tag.split('=')
   key = tag[0]
   values = tag[1].split(',')
-  response = ec2.describe_instances(filters: [{:name => "tag-key", :values => [key]}])
-  if response.reservations[0].nil?
-    puts "No instances in #{options['region']} had a tag named '#{key}'"
-    next
-  else
-    response.reservations.each do |reservation|
-      reservation.instances.each do |instance|
-        tag_value = instance.tags.keep_if{|instance_tag| instance_tag[:key] == key}[0][:value]
-        if values.include? tag_value
-          instances << instance
-        end
-      end
-    end
-  end
+  matched_instances << get_instances_by_tag(key,values,options)
 end
+instances = matched_instances[0]
+matched_instances.map {|group| instances = group & instances }
 
 if instances.length == 0
   puts "No instnaces matched filter: #{options['tags']}"
