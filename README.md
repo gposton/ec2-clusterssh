@@ -5,7 +5,7 @@ Use instance tags to launch a ClusterSSH session to multiple EC2 instances.
 ## Installation
 
     $ gem install ec2-clusterssh
-    
+
 Note:  Mac users with the latest version of XCode may run into a compilation error installing the json gem dependency.  If you see the following error during the gem installation, see this [page](https://langui.sh/2014/03/10/wunused-command-line-argument-hard-error-in-future-is-a-harsh-mistress/) for a workaround
 
 > clang: error: unknown argument: '-multiply_definedsuppress' [-Wunused-command-line-argument-hard-error-in-future]
@@ -20,25 +20,25 @@ Note:  Mac users with the latest version of XCode may run into a compilation err
 
 > export AWS_SECRET_ACCESS_KEY='...'
 
-> export AWS_REGION='us-west-2'
-
-- Edit /etc/csshrc to add the path to your identity file (rsa key).
-NOTE: Some linux users have reported problems using /etc/csshrc, but have had success using ~/.csshrc.
-
-> ssh_args = -i path/to/identity/file
-
 ## Usage
 
     $cluster -h
-    Usage: cluster [-t TAG] [-l USER] [-k KEY -s SECRET] [-r region] -v VALUES
-        -l, --login [USER]               Log in with this user (default: ec2-user)
-        -t, --tag [TAG]                  TAG to filter on (default: role)
-        -v, --values [VALUES]            a comma separated (no spaces) list of values to match against (i.e. web,database)
-        -k, --access-key [KEY]           AWS access key
-        -s, --secret-key [SECRET]        AWS secret key
+    Usage: cluster [-t TAGS] [-l USER] [-k KEY -s SECRET] [-r region]
+        -l, --login [USER]               Log in with this user
+        -t, --tags [TAGS]                a 'space' sparated key value pair of tags and values (i.e. role=web,database environment=dev)
         -r, --region [REGION]            AWS region
+        -s, --screen [SCREEN]            What screen to use for clustering windows (form multiple displays)
+        -p, --use-public-ip              Use public IP (default false)
 
-    $cluster -l ec2-user -t Name -v web,database
+
+    $cluster -t Name=web,database                  #Connects to all web and database servers
+    $cluster -t role=web,database environment=dev  #Connects to all web and database servers in the dev environment
+
+## Notes
+
+If you use a bastion jumphost, you'll want to configure your ssh config
+file to route the relavant IP ranges through your bastion.  (i.e.
+192.168.*)
 
 ## Contributing
 

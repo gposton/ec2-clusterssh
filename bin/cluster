@@ -4,46 +4,83 @@ require 'optparse'
 require 'rubygems'
 require 'aws-sdk'
 
-options = {'tag' => 'role', 'user' => 'ec2-user'}
-OptionParser.new do |opts|
-  opts.banner = "Usage: cluster [-t TAG] [-l USER] [-k KEY -s SECRET] [-r region] -v VALUES"
+options = {
+  'use_public_ip'  => false,
+  'region'         => 'us-west-2'
+}
 
-  opts.on("-l", "--login [USER]", "Log in with this user (default: #{options['user']}") do |opt|
+OptionParser.new do |opts|
+  opts.banner = "Usage: cluster [-t TAGS] [-l USER] [-k KEY -s SECRET] [-r region]"
+
+  opts.on("-l", "--login [USER]", "Log in with this user") do |opt|
     options['user'] = opt
   end
 
-  opts.on("-t", "--tag [TAG]", "TAG to filter on (default: #{options['tag']}") do |opt|
-    options['tag'] = opt
-  end
-
-  opts.on("-v", "--values [VALUES]", Array, "a comma separated (no spaces) list of values to match against (i.e. web,database)") do |opt|
-    options['values'] = opt
-  end
-
-  opts.on("-k", "--access-key [KEY]", "AWS access key") do |opt|
-    options['aws_access_key'] = opt
-  end
-
-  opts.on("-s", "--secret-key [SECRET]", "AWS secret key") do |opt|
-    options['aws_secret_key'] = opt
+  opts.on("-t", "--tags [TAGS]", "a 'space' sparated key value pair of tags and values (i.e. role=web,database environment=dev)") do |opt|
+    options['tags'] = opt.split(' ')
   end
 
   opts.on("-r", "--region [REGION]", "AWS region") do |opt|
     options['region'] = opt
   end
+
+  opts.on("-s", "--screen [SCREEN]", "What screen to use for clustering windows (form multiple displays)") do |opt|
+    options['screen'] = opt
+  end
+
+  opts.on("-p", "--use-public-ip", "Use public IP (default #{options['use_public_ip']})") do
+    options['use_public_ip'] = true
+  end
+
 end.parse!
 
-if !options['aws_secret_key'].nil? && !options['aws_access_key'].nil?
-  AWS.config(access_key_id: options['aws_access_key'], secret_access_key: options['aws_secret_key'])
+Aws.config.update({:region => options['region']})
+
+ec2 = Aws::EC2::Client.new
+
+# filter instances based on tags
+instances = []
+options['tags'].each do |tag|
+  tag = tag.split('=')
+  key = tag[0]
+  values = tag[1].split(',')
+  response = ec2.describe_instances(filters: [{:name => "tag-key", :values => [key]}])
+  if response.reservations[0].nil?
+    puts "No instances in #{options['region']} had a tag named '#{key}'"
+    next
+  else
+    response.reservations.each do |reservation|
+      reservation.instances.each do |instance|
+        tag_value = instance.tags.keep_if{|instance_tag| instance_tag[:key] == key}[0][:value]
+        if values.include? tag_value
+          instances << instance
+        end
+      end
+    end
+  end
 end
 
-if !options['region'].nil?
-  AWS.config(region: options['region'])
+if instances.length == 0
+  puts "No instnaces matched filter: #{options['tags']}"
+  exit 1
 end
 
-ec2 = AWS.ec2
-dns = ec2.instances.tagged(options['tag']).tagged_values(options['values']).map{|instance| instance.dns_name}
+# get dns entries for cssh
+dns = nil
+if options['use_public_ip']
+  dns = instances.map{|instance| instance.public_ip_address}
+else
+  dns = instances.map{|instance| instance.private_ip_address}
+end
+
 
 cssh = (/darwin/ =~ RUBY_PLATFORM) ? 'csshX' : 'cssh'
 
-exec "#{cssh} -l #{options['user']} #{dns.join ' '}"
+cmd = "#{cssh}"
+cmd = cmd + " -l #{options['user']}" unless options['user'].nil?
+cmd = cmd + " -screen #{options['screen']}" unless options['screen'].nil?
+cmd = cmd + " #{dns.join ' '}"
+
+puts "Connecting to #{dns.length} instances"
+puts cmd
+exec cmd
