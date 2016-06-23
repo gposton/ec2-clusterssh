@@ -16,8 +16,8 @@ OptionParser.new do |opts|
     options['user'] = opt
   end
 
-  opts.on("-t", "--tags [TAGS]", "a 'space' sparated key value pair of tags and values (i.e. role=web,database environment=dev)") do |opt|
-    options['tags'] = opt.split(' ')
+  opts.on("-t", "--tags [TAGS]", Array, "a 'comma' sparated key value pair of tags and values (i.e. role=web|database,environment=dev)") do |opt|
+    options['tags'] = opt
   end
 
   opts.on("-r", "--region [REGION]", "AWS region") do |opt|
@@ -34,9 +34,19 @@ OptionParser.new do |opts|
 
 end.parse!
 
+puts options
+
 
 Aws.config.update({:region => options['region']})
 $ec2 = Aws::EC2::Client.new
+
+def get_ip(instance, options)
+  if options['use_public_ip']
+    return instance.public_ip_address
+  else
+    return instance.private_ip_address
+  end
+end
 
 def get_instances_by_tag (tag_key,tag_values,options)
   instances = []
@@ -46,7 +56,7 @@ def get_instances_by_tag (tag_key,tag_values,options)
   else
     response.reservations.each do |reservation|
       reservation.instances.each do |instance|
-        instances << instance
+        instances << get_ip(instance, options)
       end
     end
     return instances
@@ -58,33 +68,26 @@ matched_instances = []
 options['tags'].each do |tag|
   tag = tag.split('=')
   key = tag[0]
-  values = tag[1].split(',')
-  matched_instances << get_instances_by_tag(key,values,options)
+  values = tag[1].split('|')
+  if matched_instances.empty?
+    matched_instances = get_instances_by_tag(key,values,options)
+  end
+  matched_instances = matched_instances & get_instances_by_tag(key,values,options)
+  puts "#{tag}: #{matched_instances}"
 end
-instances = matched_instances[0]
-matched_instances.map {|group| instances = group & instances }
 
-if instances.length == 0
+if matched_instances.length == 0
   puts "No instnaces matched filter: #{options['tags']}"
   exit 1
 end
-
-# get dns entries for cssh
-dns = nil
-if options['use_public_ip']
-  dns = instances.map{|instance| instance.public_ip_address}
-else
-  dns = instances.map{|instance| instance.private_ip_address}
-end
-
 
 cssh = (/darwin/ =~ RUBY_PLATFORM) ? 'csshX' : 'cssh'
 
 cmd = "#{cssh}"
 cmd = cmd + " -l #{options['user']}" unless options['user'].nil?
 cmd = cmd + " -screen #{options['screen']}" unless options['screen'].nil?
-cmd = cmd + " #{dns.join ' '}"
+cmd = cmd + " #{matched_instances.join ' '}"
 
-puts "Connecting to #{dns.length} instances"
+puts "Connecting to #{matched_instances.length} instances"
 puts cmd
-exec cmd
+#exec cmd
