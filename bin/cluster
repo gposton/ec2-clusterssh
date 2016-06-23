@@ -34,9 +34,6 @@ OptionParser.new do |opts|
 
 end.parse!
 
-puts options
-
-
 Aws.config.update({:region => options['region']})
 $ec2 = Aws::EC2::Client.new
 
@@ -73,7 +70,6 @@ options['tags'].each do |tag|
     matched_instances = get_instances_by_tag(key,values,options)
   end
   matched_instances = matched_instances & get_instances_by_tag(key,values,options)
-  puts "#{tag}: #{matched_instances}"
 end
 
 if matched_instances.length == 0
@@ -90,4 +86,4 @@ cmd = cmd + " #{matched_instances.join ' '}"
 
 puts "Connecting to #{matched_instances.length} instances"
 puts cmd
-#exec cmd
+exec cmd
