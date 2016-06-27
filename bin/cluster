@@ -56,8 +56,8 @@ def get_instances_by_tag (tag_key,tag_values,options)
         instances << get_ip(instance, options)
       end
     end
-    return instances
   end
+  return instances
 end
 
 matched_instances = []
