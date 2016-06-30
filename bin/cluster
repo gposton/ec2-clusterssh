@@ -10,7 +10,7 @@ options = {
 }
 
 OptionParser.new do |opts|
-  opts.banner = "Usage: cluster [-t TAGS] [-l USER] [-k KEY -s SECRET] [-r region]"
+  opts.banner = "Usage: cluster [-t TAGS] [-l USER] [-k KEY -s SECRET] [-r region] [-o SSH_OPTIONS]"
 
   opts.on("-l", "--login [USER]", "Log in with this user") do |opt|
     options['user'] = opt
@@ -30,6 +30,11 @@ OptionParser.new do |opts|
 
   opts.on("-p", "--use-public-ip", "Use public IP (default #{options['use_public_ip']})") do
     options['use_public_ip'] = true
+  end
+
+  #Allow -o to be passed to give specific ssh options
+  opts.on("-o", "--options [SSH_OPTIONS]", "ssh options to pass directly to cssh") do |opt|
+    options['SSH_OPTIONS'] = opt
   end
 
 end.parse!
@@ -80,6 +85,7 @@ end
 cssh = (/darwin/ =~ RUBY_PLATFORM) ? 'csshX' : 'cssh'
 
 cmd = "#{cssh}"
+cmd = cmd + " --ssh_args '#{options['SSH_OPTIONS']}'"
 cmd = cmd + " -l #{options['user']}" unless options['user'].nil?
 cmd = cmd + " -screen #{options['screen']}" unless options['screen'].nil?
 cmd = cmd + " #{matched_instances.join ' '}"
