@@ -2,7 +2,7 @@
 
 require 'optparse'
 require 'rubygems'
-require 'aws-sdk'
+require 'aws-sdk-ec2'
 
 options = {
   'use_public_ip'  => false,
